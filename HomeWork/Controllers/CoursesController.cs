@@ -52,7 +52,6 @@ namespace HomeWork.Controllers
             Course model = new Course
             {
                 CourseId = id,
-
             };
             model.InjectFrom(course);
             _context.Entry(model).State = EntityState.Modified;
@@ -134,6 +133,26 @@ namespace HomeWork.Controllers
                 InstructorId = x,
             });
             _context.CourseInstructors.RemoveRange(models);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpPost("UpdateGrade/{id}")]
+        public async Task<IActionResult> UpdateGrade(int id, UpdateGradeViewModel model)
+        {
+            Course course = await _context.Courses.SingleOrDefaultAsync(x => x.CourseId == id);
+            if (course == null) return BadRequest();
+            Person person = await _context.People.SingleOrDefaultAsync(x => x.Id == model.StudentId);
+            if (person == null) return BadRequest();
+
+            if (person.Discriminator.ToLower() == "Student".ToLower())
+            {
+                var grade = await _context.Enrollments.SingleOrDefaultAsync(x => x.CourseId == id && x.StudentId == person.Id);
+                if (grade == null) _context.Add(new Enrollment { CourseId = id, StudentId = person.Id, Grade = model.Grade });
+                else grade.Grade = model.Grade;
+            }
+
             await _context.SaveChangesAsync();
 
             return NoContent();

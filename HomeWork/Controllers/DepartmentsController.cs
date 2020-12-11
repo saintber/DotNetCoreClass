@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HomeWork.Entity;
+using HomeWork.ViewModels;
 
 namespace HomeWork.Controllers
 {
@@ -44,30 +45,15 @@ namespace HomeWork.Controllers
         // PUT: api/Departments/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDepartment(int id, Department department)
+        public async Task<IActionResult> PutDepartment(int id, CreateDepartmentViewModel department)
         {
-            if (id != department.DepartmentId)
+            var model = await _context.Departments.FindAsync(id);
+            if (model == null)
             {
-                return BadRequest();
+                return NotFound();
             }
-
-            _context.Entry(department).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DepartmentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _context.Database.ExecuteSqlInterpolatedAsync(
+                $"EXECUTE [dbo].[Department_Update] {id},{department.Name},{department.Budget},{department.StartDate},{department.InstructorId},{model.RowVersion}");
 
             return NoContent();
         }
@@ -75,12 +61,14 @@ namespace HomeWork.Controllers
         // POST: api/Departments
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Department>> PostDepartment(Department department)
+        public async Task<ActionResult<Department>> PostDepartment(CreateDepartmentViewModel department)
         {
-            _context.Departments.Add(department);
-            await _context.SaveChangesAsync();
+            var result = (await _context.CreateDepartmentResult.FromSqlInterpolated(
+                $"EXECUTE [dbo].[Department_Insert] { department.Name},{department.Budget},{department.StartDate},{department.InstructorId}")
+                .ToListAsync()).Single();
+            var model = await _context.Departments.SingleAsync(x => x.DepartmentId == result.DepartmentId);
 
-            return CreatedAtAction("GetDepartment", new { id = department.DepartmentId }, department);
+            return CreatedAtAction("GetDepartment", new { id = model.DepartmentId }, model);
         }
 
         // DELETE: api/Departments/5
@@ -92,9 +80,7 @@ namespace HomeWork.Controllers
             {
                 return NotFound();
             }
-
-            _context.Departments.Remove(department);
-            await _context.SaveChangesAsync();
+            await _context.Database.ExecuteSqlInterpolatedAsync($"EXECUTE [dbo].[Department_Delete] {id},{department.RowVersion}");
 
             return NoContent();
         }

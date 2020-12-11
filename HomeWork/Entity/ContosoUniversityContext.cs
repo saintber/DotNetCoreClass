@@ -1,4 +1,5 @@
 ﻿using System;
+using HomeWork.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -26,6 +27,7 @@ namespace HomeWork.Entity
         public virtual DbSet<VwCourseStudent> VwCourseStudents { get; set; }
         public virtual DbSet<VwCourseStudentCount> VwCourseStudentCounts { get; set; }
         public virtual DbSet<VwDepartmentCourseCount> VwDepartmentCourseCounts { get; set; }
+        public virtual DbSet<CreateDepartmentResult> CreateDepartmentResult { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -225,6 +227,11 @@ namespace HomeWork.Entity
                 entity.Property(e => e.DepartmentId).HasColumnName("DepartmentID");
 
                 entity.Property(e => e.Name).HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<CreateDepartmentResult>(entity =>
+            {
+                entity.HasNoKey();
             });
 
             OnModelCreatingPartial(modelBuilder);
