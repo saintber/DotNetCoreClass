@@ -159,6 +159,18 @@ namespace HomeWork.Controllers
         }
         #endregion
 
+        #region === 檢視表 ===
+        [HttpGet("GetStudentCount")]
+        public async Task<ActionResult<IEnumerable<VwCourseStudentCount>>> GetStudentCount()
+        {
+            return await _context.VwCourseStudentCounts.ToListAsync();
+        }
+        [HttpGet("GetStudents")]
+        public async Task<ActionResult<IEnumerable<VwCourseStudent>>> GetStudents()
+        {
+            return await _context.VwCourseStudents.ToListAsync();
+        }
+        #endregion
     }
 
 }
