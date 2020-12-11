@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using HomeWork.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -238,5 +240,35 @@ namespace HomeWork.Entity
         }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+        public override int SaveChanges()
+        {
+            foreach (var entry in this.ChangeTracker.Entries())
+            {
+                entry.CurrentValues["DateModified"] = DateTime.Now;
+                if (entry.State == EntityState.Deleted)
+                {
+                    entry.CurrentValues["IsDeleted"] = true;
+                    entry.State = EntityState.Modified;
+                }
+            }
+            return base.SaveChanges();
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            foreach (var entry in this.ChangeTracker.Entries())
+            {
+                entry.CurrentValues["DateModified"] = DateTime.Now;
+                if (entry.State == EntityState.Deleted)
+                {
+                    entry.CurrentValues["IsDeleted"] = true;
+                    entry.State = EntityState.Modified;
+                }
+            }
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+
     }
 }

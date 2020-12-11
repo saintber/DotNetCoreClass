@@ -27,14 +27,14 @@ namespace HomeWork.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Person>>> GetPeople()
         {
-            return await _context.People.ToListAsync();
+            return await _context.People.Where(x => !x.IsDeleted).ToListAsync();
         }
 
         // GET: api/People/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Person>> GetPerson(int id)
         {
-            var person = await _context.People.FindAsync(id);
+            var person = await _context.People.Where(x => !x.IsDeleted && x.Id == id).SingleOrDefaultAsync();
 
             if (person == null)
             {

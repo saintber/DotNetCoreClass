@@ -25,14 +25,14 @@ namespace HomeWork.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Department>>> GetDepartments()
         {
-            return await _context.Departments.ToListAsync();
+            return await _context.Departments.Where(x => !x.IsDeleted).ToListAsync();
         }
 
         // GET: api/Departments/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Department>> GetDepartment(int id)
         {
-            var department = await _context.Departments.FindAsync(id);
+            var department = await _context.Departments.Where(x => !x.IsDeleted && x.DepartmentId == id).SingleOrDefaultAsync();
 
             if (department == null)
             {
