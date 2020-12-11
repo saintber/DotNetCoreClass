@@ -170,6 +170,12 @@ namespace HomeWork.Controllers
         {
             return await _context.VwCourseStudents.ToListAsync();
         }
+        [HttpGet("GetDepartmentCourseCount")]
+        public async Task<ActionResult<IEnumerable<VwDepartmentCourseCount>>> GetDepartmentCourseCount()
+        {
+            return await _context.VwDepartmentCourseCounts.FromSqlRaw(
+                "SELECT [DepartmentID],[Name],[CourseCount] FROM [dbo].[vwDepartmentCourseCount]").ToListAsync();
+        }
         #endregion
     }
 
